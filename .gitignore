@@ -1,0 +1,3 @@
+# Installed gems and Bundler's local settings
+/vendor/bundle/
+/.bundle/

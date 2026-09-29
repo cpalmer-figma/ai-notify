@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Starts the coder-notify service when you log in and restarts it if it
+  exits. Copy to ~/Library/LaunchAgents/dev.coder-notify.plist, replace every
+  /Users/YOU path, and load it (see README, "Run it at login").
+
+  launchd does not read your shell profile, so every path is absolute and
+  PATH is set explicitly.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>dev.coder-notify</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/YOU/.rbenv/versions/3.4.7/bin/ruby</string>
+    <string>/Users/YOU/work/coder-notify/bin/coder-notify</string>
+    <string>server</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/YOU/work/coder-notify</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>CODER_BIN</key>
+    <string>/usr/local/bin/coder</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <!-- Don't restart more often than every 10 seconds if it keeps crashing. -->
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+
+  <key>StandardOutPath</key>
+  <string>/Users/YOU/.coder-notify/logs/service.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/YOU/.coder-notify/logs/service.log</string>
+</dict>
+</plist>

@@ -1,0 +1,12 @@
+# FALLBACK ONLY, for Codex versions without hooks (older than 0.124).
+# Do not combine with hooks.json, or every finished turn is reported twice.
+#
+# `notify` must be a top-level key: put it ABOVE the first [table] header in
+# ~/.codex/config.toml, and only if you don't already have a `notify` line.
+# Codex runs it without a shell, so use the absolute path to your home
+# directory (run `echo $HOME` on the workspace), not ~ or $HOME.
+#
+# This only reports "finished responding"; Codex's notify has no event for
+# approval requests or prompt submission.
+
+notify = ["/home/YOUR_USER/.local/bin/coder-notify-remote", "codex-notify"]

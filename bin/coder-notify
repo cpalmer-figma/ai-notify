@@ -1,0 +1,129 @@
+#!/usr/bin/env ruby
+# Command-line helper for the Mac side of coder-notify.
+#
+#   bin/coder-notify server         Run the service in the foreground (Puma on 127.0.0.1)
+#   bin/coder-notify enable NAME    Create a token for workspace NAME; print its remote config
+#   bin/coder-notify token NAME     Print the remote config for NAME again
+#   bin/coder-notify disable NAME   Delete NAME's token; its tunnel stops within seconds
+#   bin/coder-notify status         Show what the running service sees
+#
+# Settings come from environment variables; see lib/coder_notify/config.rb.
+
+# This file sticks to old Ruby syntax so that it can explain a wrong Ruby
+# version instead of failing with a syntax error.
+if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("3.2")
+  abort "coder-notify needs Ruby 3.4 (see .ruby-version), but this is Ruby #{RUBY_VERSION} " \
+        "(#{RbConfig.ruby}).\nInstall it with `rbenv install 3.4.7` and make sure rbenv's shims come first in PATH."
+end
+
+ROOT = File.expand_path("..", __dir__)
+ENV["BUNDLE_GEMFILE"] ||= File.join(ROOT, "Gemfile")
+require "bundler/setup"
+require "net/http"
+require_relative "../lib/coder_notify"
+
+module CoderNotifyCLI
+  module_function
+
+  def run(argv)
+    command, name = argv
+    case command
+    when "server" then server
+    when "enable" then enable(required(name))
+    when "token" then token(required(name))
+    when "disable" then disable(required(name))
+    when "status" then status
+    else
+      warn File.read(__FILE__).lines.grep(/^#   /).map { |line| line.sub(/^#   /, "") }.join
+      exit 2
+    end
+  end
+
+  def config
+    @config ||= CoderNotify::Config.new.tap(&:ensure_home!)
+  end
+
+  def tokens
+    CoderNotify::TokenStore.new(path: config.tokens_path)
+  end
+
+  def required(name)
+    name || abort("error: give a workspace name (see `coder list`)")
+  end
+
+  def server
+    require "puma/cli"
+    Puma::CLI.new(["-C", File.join(ROOT, "config/puma.rb"), File.join(ROOT, "config.ru")]).run
+  end
+
+  # Looks the workspace up with `coder list` (to get its stable id) and
+  # creates a token for it. Nothing is sent to the workspace.
+  def enable(name)
+    result = CoderNotify::WorkspaceDiscovery.new(coder_bin: config.coder_bin).call
+    abort "error: #{result.error}" unless result.ok?
+
+    workspace = result.workspaces.find { |ws| ws.name == name }
+    abort "error: no workspace named #{name.inspect}; `coder list` shows: #{result.workspaces.map(&:name).join(', ')}" unless workspace
+
+    entry = tokens.enable(workspace)
+    puts "Enabled #{workspace.name} (Coder id #{workspace.id})."
+    print_remote_config(entry)
+  end
+
+  def token(name)
+    entry = tokens.entries.find { |e| e.workspace_name == name } || abort("error: #{name} is not enabled; run: bin/coder-notify enable #{name}")
+    print_remote_config(entry)
+  end
+
+  def disable(name)
+    entry = tokens.entries.find { |e| e.workspace_name == name } || abort("error: #{name} is not enabled")
+    tokens.disable(entry.workspace_id)
+    puts "Disabled #{name}. Its tunnel stops within a few seconds. Remove the remote files by hand (see README, Uninstall)."
+  end
+
+  def print_remote_config(entry)
+    puts <<~TEXT
+
+      On the workspace #{entry.workspace_name.inspect}, create ~/.config/coder-notify/env
+      (paste these lines into a shell there; they only create that one file):
+
+        mkdir -p ~/.config/coder-notify && chmod 700 ~/.config/coder-notify
+        cat > ~/.config/coder-notify/env <<'EOF'
+        CODER_NOTIFY_URL=http://127.0.0.1:#{config.remote_port}
+        CODER_NOTIFY_TOKEN=#{entry.token}
+        EOF
+        chmod 600 ~/.config/coder-notify/env
+
+      Then finish "Remote workspace setup" in README.md. Keep this token private.
+    TEXT
+  end
+
+  def status
+    token = File.read(config.menu_token_path).strip
+    uri = URI("http://127.0.0.1:#{config.port}/sessions")
+    request = Net::HTTP::Get.new(uri)
+    request["Authorization"] = "Bearer #{token}"
+    response = Net::HTTP.start(uri.host, uri.port, open_timeout: 1, read_timeout: 2) { |http| http.request(request) }
+    snapshot = JSON.parse(response.body)
+    abort "error: #{snapshot['error']}" if snapshot["error"]
+
+    puts "Service: running on 127.0.0.1:#{config.port}"
+    puts "Discovery: #{snapshot.dig('discovery', 'error') || 'ok'} (checked #{snapshot.dig('discovery', 'checked_at') || 'never'})"
+    puts "\nWorkspaces:"
+    snapshot["workspaces"].each do |ws|
+      puts format("  %-24s %-12s %-22s %s", ws["name"], ws["state"], ws.dig("monitoring", "state"), ws.dig("monitoring", "detail"))
+    end
+    puts "\nSessions (#{snapshot['attention_count']} need attention):"
+    puts "  none" if snapshot["sessions"].empty?
+    snapshot["sessions"].each do |s|
+      flag = s["attention"] ? "!" : " "
+      puts "  #{flag} #{s['agent_label']} on #{s['workspace_name']} #{s['pane_label']} (#{s['pane_id']}): #{s['reason_label']}"
+    end
+  rescue Errno::ENOENT
+    abort "error: no menu token yet; start the service first (bin/coder-notify server)"
+  rescue SystemCallError, Net::OpenTimeout
+    abort "error: the service is not running on 127.0.0.1:#{config.port}"
+  end
+end
+
+CoderNotifyCLI.run(ARGV)

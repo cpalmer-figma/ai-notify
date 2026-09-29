@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Fake tmux for the remote script tests. Only answers the queries the
+# script makes; behaviour is tuned with FAKE_* environment variables.
+case "$1" in
+  display-message)
+    format="${*: -1}"
+    case "$format" in
+      '#{pane_pid}') echo "${FAKE_PANE_PID:-1}" ;;
+      '#{session_name}:#{window_index}.#{pane_index}') echo "main:1.0" ;;
+      '#{pane_active}#{window_active}') echo "${FAKE_PANE_ACTIVE:-11}" ;;
+      '#{session_name}') echo "main" ;;
+    esac ;;
+  show-options) echo "${FAKE_FOCUS_EVENTS:-off}" ;;
+  list-clients) echo "${FAKE_CLIENT_FLAGS:-attached,focused,UTF-8}" ;;
+  list-panes)
+    if [ -n "${FAKE_TMUX_DOWN:-}" ]; then
+      echo "no server running on /tmp/tmux-1000/default" >&2
+      exit 1
+    fi
+    printf '%%1\tmain:1.0\n%%5\twork:2.1\n' ;;
+esac

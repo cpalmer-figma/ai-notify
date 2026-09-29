@@ -1,0 +1,659 @@
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "alpha",
+    "owner_name": "me",
+    "template_name": "devbox",
+    "outdated": false,
+    "dormant_at": null,
+    "deleting_at": null,
+    "health": {
+      "healthy": true,
+      "failing_agents": []
+    },
+    "latest_build": {
+      "status": "running",
+      "transition": "start",
+      "resources": [
+        {
+          "name": "workspace",
+          "type": "aws_launch_template",
+          "agents": [
+            {
+              "id": "0000000a-0000-4000-8000-000000000001",
+              "name": "devcontainer",
+              "status": "connected",
+              "lifecycle_state": "start_error",
+              "parent_id": "0000000a-0000-4000-8000-000000000002"
+            },
+            {
+              "id": "0000000a-0000-4000-8000-000000000002",
+              "name": "workspace",
+              "status": "connected",
+              "lifecycle_state": "ready",
+              "parent_id": null
+            }
+          ]
+        },
+        {
+          "name": "anthropic_auth_token",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "anthropic_base_url",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "cloud_init_scripts",
+          "type": "aws_s3_object",
+          "agents": []
+        },
+        {
+          "name": "coder_session_token",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "coder_session_token",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "coder_url",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "coder_url",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "devcontainer",
+          "type": "coder_devcontainer",
+          "agents": []
+        },
+        {
+          "name": "fleet",
+          "type": "aws_ec2_instance_state",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "git_author_email",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "git_author_name",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "git_commmiter_email",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "git_commmiter_name",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "node_extra_ca_certs",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "openai_api_key",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "openai_base_url",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "openai_fast_enabled",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "requests_ca_bundle",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "validate_workspace_name",
+          "type": "terraform_data",
+          "agents": []
+        },
+        {
+          "name": "workspace",
+          "type": "aws_ec2_fleet",
+          "agents": []
+        },
+        {
+          "name": "workspace_termination_delay",
+          "type": "time_sleep",
+          "agents": []
+        },
+        {
+          "name": "workspace_tier",
+          "type": "terraform_data",
+          "agents": []
+        },
+        {
+          "name": "workspace_volume",
+          "type": "aws_ebs_volume",
+          "agents": []
+        },
+        {
+          "name": "workspace_volume_attachment",
+          "type": "aws_volume_attachment",
+          "agents": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "00000000-0000-4000-8000-000000000002",
+    "name": "beta",
+    "owner_name": "me",
+    "template_name": "devbox",
+    "outdated": false,
+    "dormant_at": null,
+    "deleting_at": null,
+    "health": {
+      "healthy": true,
+      "failing_agents": []
+    },
+    "latest_build": {
+      "status": "running",
+      "transition": "start",
+      "resources": [
+        {
+          "name": "workspace",
+          "type": "aws_launch_template",
+          "agents": [
+            {
+              "id": "0000000a-0000-4000-8000-000000000003",
+              "name": "devcontainer",
+              "status": "connected",
+              "lifecycle_state": "start_error",
+              "parent_id": "0000000a-0000-4000-8000-000000000004"
+            },
+            {
+              "id": "0000000a-0000-4000-8000-000000000004",
+              "name": "workspace",
+              "status": "connected",
+              "lifecycle_state": "ready",
+              "parent_id": null
+            }
+          ]
+        },
+        {
+          "name": "anthropic_auth_token",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "anthropic_base_url",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "cloud_init_scripts",
+          "type": "aws_s3_object",
+          "agents": []
+        },
+        {
+          "name": "coder_session_token",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "coder_session_token",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "coder_url",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "coder_url",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "devcontainer",
+          "type": "coder_devcontainer",
+          "agents": []
+        },
+        {
+          "name": "fleet",
+          "type": "aws_ec2_instance_state",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_instance",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "fleet_root_volume",
+          "type": "aws_ec2_tag",
+          "agents": []
+        },
+        {
+          "name": "git_author_email",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "git_author_name",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "git_commmiter_email",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "git_commmiter_name",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "node_extra_ca_certs",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "openai_api_key",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "openai_base_url",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "openai_fast_enabled",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "requests_ca_bundle",
+          "type": "coder_env",
+          "agents": []
+        },
+        {
+          "name": "validate_workspace_name",
+          "type": "terraform_data",
+          "agents": []
+        },
+        {
+          "name": "workspace",
+          "type": "aws_ec2_fleet",
+          "agents": []
+        },
+        {
+          "name": "workspace_termination_delay",
+          "type": "time_sleep",
+          "agents": []
+        },
+        {
+          "name": "workspace_tier",
+          "type": "terraform_data",
+          "agents": []
+        },
+        {
+          "name": "workspace_volume",
+          "type": "aws_ebs_volume",
+          "agents": []
+        },
+        {
+          "name": "workspace_volume_attachment",
+          "type": "aws_volume_attachment",
+          "agents": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "00000000-0000-4000-8000-000000000003",
+    "name": "gamma",
+    "owner_name": "me",
+    "template_name": "devbox",
+    "outdated": false,
+    "dormant_at": null,
+    "deleting_at": null,
+    "health": {
+      "healthy": true,
+      "failing_agents": []
+    },
+    "latest_build": {
+      "status": "stopped",
+      "transition": "stop",
+      "resources": [
+        {
+          "name": "cloud_init_scripts",
+          "type": "aws_s3_object",
+          "agents": []
+        },
+        {
+          "name": "devcontainer",
+          "type": "coder_devcontainer",
+          "agents": []
+        },
+        {
+          "name": "validate_workspace_name",
+          "type": "terraform_data",
+          "agents": []
+        },
+        {
+          "name": "workspace_volume",
+          "type": "aws_ebs_volume",
+          "agents": []
+        }
+      ]
+    }
+  }
+]

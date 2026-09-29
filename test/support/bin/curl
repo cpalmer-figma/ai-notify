@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Fake curl for the remote script tests. Logs each request as one JSON line
+# to $FAKE_CURL_LOG and answers with canned responses:
+#   FAKE_CURL_STATUS  HTTP status to report (000 = connection failed)
+#   FAKE_HEALTH       body returned for GET requests (e.g. /health)
+argv="$*"
+body="" url="" write_out="" config=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --data-binary) body="$2"; shift 2 ;;
+    -w) write_out="$2"; shift 2 ;;
+    -K) config=$(cat "$2"); shift 2 ;;
+    -o|-H|--connect-timeout|--max-time) shift 2 ;;
+    http*) url="$1"; shift ;;
+    *) shift ;;
+  esac
+done
+jq -cn --arg url "$url" --arg config "$config" --arg body "$body" --arg argv "$argv" \
+  '{url: $url, config: $config, body: $body, argv: $argv}' >>"$FAKE_CURL_LOG"
+
+status="${FAKE_CURL_STATUS:-200}"
+if [ "$status" = "000" ]; then
+  [ -n "$write_out" ] && printf '000'
+  exit 7
+fi
+if [ -n "$write_out" ]; then
+  printf '%s' "$status"
+else
+  printf '%s' "${FAKE_HEALTH:-{\"ok\":true,\"service\":\"coder-notify\",\"workspace\":\"alpha\"}}"
+fi
