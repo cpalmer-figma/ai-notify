@@ -1,3 +1,8 @@
 # Installed gems and Bundler's local settings
 /vendor/bundle/
 /.bundle/
+
+# Local Xcode build output and user preferences
+/macos/build/
+**/xcuserdata/
+.DS_Store

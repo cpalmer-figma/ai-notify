@@ -38,6 +38,46 @@ class AppTest < Minitest::Test
     assert_equal({ "ok" => true, "service" => "coder-notify" }, json)
   end
 
+  def test_dashboard_shell_contains_no_credentials_or_workspace_data
+    get "/"
+    assert_equal 200, last_response.status
+    assert_match(/text\/html/, last_response.content_type)
+    assert_includes last_response.body, "Your workspaces"
+    refute_includes last_response.body, @service.menu_token
+    refute_includes last_response.body, @token
+    refute_includes last_response.body, "alpha"
+    assert_includes last_response.headers["content-security-policy"], "frame-ancestors 'none'"
+  end
+
+  def test_browser_session_requires_menu_token_and_sets_private_cookie
+    header "Authorization", "Bearer #{@token}"
+    post "/browser-session"
+    assert_equal 401, last_response.status
+
+    header "Authorization", "Bearer #{@service.menu_token}"
+    post "/browser-session"
+    assert_equal 200, last_response.status
+    cookie = last_response.headers["set-cookie"]
+    assert_match(/httponly/i, cookie)
+    assert_match(/samesite=strict/i, cookie)
+
+    header "Authorization", nil
+    get "/sessions"
+    assert_equal 200, last_response.status
+    assert_equal 2, json["workspaces"].size
+    header "Content-Type", "application/json"
+    post "/sessions/dismiss", JSON.generate(all: true)
+    assert_equal 200, last_response.status
+    post "/browser-session"
+    assert_equal 401, last_response.status, "bootstrap cannot use a cookie"
+  end
+
+  def test_dashboard_javascript_is_served
+    get "/dashboard.js"
+    assert_equal 200, last_response.status
+    assert_match(/javascript/, last_response.content_type)
+  end
+
   def test_health_names_the_workspace_for_a_valid_token
     header "Authorization", "Bearer #{@token}"
     get "/health"

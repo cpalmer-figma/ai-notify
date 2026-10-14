@@ -60,4 +60,12 @@ class TokenStoreTest < Minitest::Test
     store.enable(workspace)
     assert_equal 0o600, File.stat(File.join(tmpdir, "tokens.json")).mode & 0o777
   end
+
+  def test_setup_can_commit_a_prepared_token_and_renames_keep_it
+    tokens = store
+    entry = tokens.enable(workspace, token: "a" * 64)
+    renamed = tokens.enable(workspace(name: "renamed"))
+    assert_equal entry.token, renamed.token
+    assert_equal "renamed", renamed.workspace_name
+  end
 end

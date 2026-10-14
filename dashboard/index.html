@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Coder Notify · Workspaces</title>
+  <style>
+    :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #18352e; background: #f4f6f2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: #163d32; color: #fff; padding: 22px 6%; display: flex; align-items: center; justify-content: space-between; }
+    .brand { font-size: 18px; font-weight: 650; letter-spacing: -.4px; }
+    .local { color: #bfd4c8; font-size: 13px; }
+    main { max-width: 1080px; margin: 0 auto; padding: 54px 28px; }
+    .heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    h1 { font-size: 36px; letter-spacing: -1.4px; margin: 0 0 10px; }
+    h2 { font-size: 20px; letter-spacing: -.4px; margin: 0; }
+    p { color: #64776d; line-height: 1.6; }
+    .intro { margin: 0; }
+    button { border: 1px solid #c9d4cb; border-radius: 8px; padding: 10px 16px; background: white; color: #18352e; font: inherit; cursor: pointer; }
+    button:hover { background: #eaf0e8; }
+    button:disabled { opacity: .6; cursor: wait; }
+    .summary { display: flex; gap: 30px; margin: 30px 0; padding: 20px 0; border-top: 1px solid #dae2d8; border-bottom: 1px solid #dae2d8; flex-wrap: wrap; }
+    .summary strong { font-size: 28px; font-weight: 550; padding-right: 8px; }
+    .summary span { font-size: 14px; color: #64776d; }
+    .section-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .legend { color: #64776d; font-size: 12px; display: flex; gap: 16px; }
+    .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #89978e; margin-right: 7px; }
+    .green { background: #299363; } .red { background: #ca554d; } .yellow { background: #c99928; }
+    .machines { background: #fff; border: 1px solid #dce4da; border-radius: 12px; overflow: hidden; }
+    .machine { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px; gap: 20px; border-bottom: 1px solid #e8ede5; }
+    .machine:last-child { border-bottom: 0; }
+    .machine-name { font-size: 16px; font-weight: 600; display: flex; align-items: center; }
+    .detail { margin: 7px 0 0 16px; font-size: 13px; color: #78867c; }
+    .status { font-size: 13px; white-space: nowrap; padding: 5px 10px; border-radius: 5px; background: #f0f3ed; }
+    .status.running { color: #26734d; background: #edf6ee; }
+    .status.stopped, .status.failed, .status.deleting { color: #a1453d; background: #fcf0ed; }
+    .status.starting, .status.unreachable { color: #8c6d1d; background: #faf5e7; }
+    .attention { margin-top: 36px; }
+    .sessions { display: grid; gap: 12px; margin-top: 16px; }
+    .session { border: 1px solid #dce4da; border-radius: 10px; background: #fff; padding: 18px 22px; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+    .session strong { font-size: 15px; }
+    .session p { margin: 6px 0 0; font-size: 13px; }
+    .empty { padding: 22px; border: 1px dashed #cdd9cb; border-radius: 10px; color: #64776d; font-size: 14px; }
+    #notice { padding: 14px 18px; margin: 24px 0; border-radius: 8px; background: #fcf0dd; color: #7d561e; line-height: 1.6; }
+    #notice:empty { display: none; }
+    footer { margin-top: 32px; font-size: 12px; color: #78867c; }
+    code { font-size: 13px; }
+    @media (max-width: 600px) { main { padding: 30px 18px; } h1 { font-size: 29px; } .legend { display: none; } .machine { padding: 18px; } .local { font-size: 11px; } .session { flex-wrap: wrap; } }
+  </style>
+  <script src="/dashboard.js" defer></script>
+</head>
+<body>
+  <header><div class="brand">◉ &nbsp; Coder Notify</div><div class="local">LOCAL DASHBOARD · 127.0.0.1</div></header>
+  <main>
+    <div class="heading"><div><h1>Your workspaces</h1><p class="intro">All your Coder machines, in one place.</p></div><button id="refresh">Refresh</button></div>
+    <div id="notice" role="status" aria-live="polite"></div>
+    <div class="summary"><div><strong id="total">—</strong><span>machines</span></div><div><strong id="running">—</strong><span>running</span></div><div><strong id="waiting">—</strong><span>need attention</span></div></div>
+    <div class="section-heading"><h2>Machines</h2><div class="legend"><span><i class="dot green"></i>Running</span><span><i class="dot red"></i>Stopped</span><span><i class="dot yellow"></i>Starting / unreachable</span></div></div>
+    <div id="machines" class="machines"><div class="empty">Connecting to the local service…</div></div>
+    <section class="attention"><div class="section-heading"><h2>Agent activity</h2><button id="dismiss-all" hidden>Dismiss all</button></div><div id="sessions" class="sessions"><div class="empty">Loading agent activity…</div></div></section>
+    <footer id="updated">Updates automatically every 5 seconds. Machine discovery runs every minute.</footer>
+  </main>
+</body>
+</html>

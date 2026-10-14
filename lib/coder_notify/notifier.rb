@@ -1,5 +1,5 @@
 module CoderNotify
-  # Human-readable text shared by notifications and the menu.
+  # Human-readable text shared by notifications and the dashboard.
   module Labels
     AGENTS = { "claude" => "Claude", "codex" => "Codex" }.freeze
     REASONS = {

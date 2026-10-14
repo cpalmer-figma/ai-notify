@@ -1,5 +1,5 @@
 module CoderNotify
-  # Runs slow side effects (posting notifications, refreshing SwiftBar) on a
+  # Runs slow side effects (posting notifications) on a
   # background thread, so HTTP requests from remote hooks return immediately.
   #
   # Several changes in quick succession are coalesced into one run: the
@@ -31,14 +31,4 @@ module CoderNotify
     end
   end
 
-  # Asks SwiftBar to re-run our plugin right away instead of waiting for its
-  # next scheduled refresh. `open -g` keeps focus where it is.
-  class MenuRefresher
-    def initialize(plugin_name:, runner: nil)
-      @url = "swiftbar://refreshplugin?name=#{plugin_name}"
-      @runner = runner || ->(*argv) { system(*argv, out: File::NULL, err: File::NULL) }
-    end
-
-    def refresh = @runner.call("open", "-g", @url)
-  end
 end

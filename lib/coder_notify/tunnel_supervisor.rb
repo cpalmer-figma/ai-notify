@@ -5,7 +5,7 @@ module CoderNotify
   # running workspace.
   #
   # Each tunnel runs `coder-notify-remote tunnel` on the workspace (a script
-  # you installed by hand). It checks the tunnel works end to end, prints
+  # installed by the setup command). It checks the tunnel works end to end, prints
   # READY, replays events that failed while the tunnel was down, reports the
   # live tmux panes, and then waits quietly. Its exit code tells us what went
   # wrong if it can't run (see EXIT_CODES).
@@ -59,7 +59,7 @@ module CoderNotify
       end
     end
 
-    # { "state" => ..., "detail" => ... } for the menu, or nil if no tunnel.
+    # { "state" => ..., "detail" => ... } for the dashboard, or nil if no tunnel.
     # While waiting to reconnect it also includes "retry_in" (seconds).
     def status(workspace_id)
       @mutex.synchronize do

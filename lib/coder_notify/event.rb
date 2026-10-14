@@ -33,7 +33,7 @@ module CoderNotify
 
     ID_FORMAT = /\A[A-Za-z0-9._:-]{1,100}\z/
     PANE_ID_FORMAT = /\A%\d{1,6}\z/
-    # Printable text without control characters, so it is safe to put in the menu.
+    # Printable text without control characters, so it is safe to put in the dashboard.
     LABEL_FORMAT = /\A[[:print:]]{1,80}\z/
     MAX_PANES = 500
 

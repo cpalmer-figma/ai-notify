@@ -8,8 +8,10 @@ module CoderNotify
   # The HTTP API. Puma binds it to 127.0.0.1 only; see config/puma.rb.
   #
   #   POST /events           - remote hook scripts report agent events (workspace token)
-  #   GET  /sessions         - the SwiftBar plugin reads current state (menu token)
-  #   POST /sessions/dismiss - the menu's "Dismiss" actions (menu token)
+  #   GET  /                 - local browser dashboard (no private data)
+  #   POST /browser-session - exchange the dashboard token for a browser cookie
+  #   GET  /sessions         - the dashboard reads current state (menu token)
+  #   POST /sessions/dismiss - the dashboard's "Dismiss" actions (menu token)
   #   GET  /health           - liveness; with a workspace token it also says which workspace
   #
   # Use App.with_context(service) to get a configured copy. The context is the
@@ -36,6 +38,27 @@ module CoderNotify
     end
 
     before { content_type :json }
+
+    get "/" do
+      content_type :html
+      headers "Cache-Control" => "no-store", "Referrer-Policy" => "no-referrer",
+              "Content-Security-Policy" => "default-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'"
+      File.read(File.expand_path("../../dashboard/index.html", __dir__))
+    end
+
+    get "/dashboard.js" do
+      content_type "application/javascript"
+      File.read(File.expand_path("../../dashboard/dashboard.js", __dir__))
+    end
+
+    post "/browser-session" do
+      # Bootstrap must use the explicit token, not an existing cookie.
+      require_menu_token!(allow_cookie: false)
+      response.set_cookie("coder_notify_browser", value: context.menu_token, httponly: true,
+                          same_site: :strict, path: "/")
+      headers "Cache-Control" => "no-store"
+      JSON.generate(ok: true)
+    end
 
     get "/health" do
       body = { ok: true, service: "coder-notify" }
@@ -66,6 +89,7 @@ module CoderNotify
 
     get "/sessions" do
       require_menu_token!
+      headers "Cache-Control" => "no-store"
       JSON.generate(context.snapshot)
     end
 
@@ -88,8 +112,8 @@ module CoderNotify
       request.env["HTTP_AUTHORIZATION"].to_s[/\ABearer (\S+)\z/, 1]
     end
 
-    def require_menu_token!
-      token = bearer_token.to_s
+    def require_menu_token!(allow_cookie: true)
+      token = (bearer_token || (request.cookies["coder_notify_browser"] if allow_cookie)).to_s
       return if Rack::Utils.secure_compare(context.menu_token, token)
 
       halt_json 401, "missing or wrong menu token"

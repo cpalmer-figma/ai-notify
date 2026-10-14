@@ -2,7 +2,9 @@
 # Command-line helper for the Mac side of coder-notify.
 #
 #   bin/coder-notify server         Run the service in the foreground (Puma on 127.0.0.1)
+#   bin/coder-notify browser        Open the local dashboard in your browser
 #   bin/coder-notify enable NAME    Create a token for workspace NAME; print its remote config
+#   bin/coder-notify setup NAME     Install remote reporter and hooks on a running workspace
 #   bin/coder-notify token NAME     Print the remote config for NAME again
 #   bin/coder-notify disable NAME   Delete NAME's token; its tunnel stops within seconds
 #   bin/coder-notify status         Show what the running service sees
@@ -20,7 +22,9 @@ ROOT = File.expand_path("..", __dir__)
 ENV["BUNDLE_GEMFILE"] ||= File.join(ROOT, "Gemfile")
 require "bundler/setup"
 require "net/http"
+require "optparse"
 require_relative "../lib/coder_notify"
+require_relative "../lib/coder_notify/workspace_setup"
 
 module CoderNotifyCLI
   module_function
@@ -29,7 +33,9 @@ module CoderNotifyCLI
     command, name = argv
     case command
     when "server" then server
+    when "browser" then browser
     when "enable" then enable(required(name))
+    when "setup" then setup(argv.drop(1))
     when "token" then token(required(name))
     when "disable" then disable(required(name))
     when "status" then status
@@ -56,6 +62,16 @@ module CoderNotifyCLI
     Puma::CLI.new(["-C", File.join(ROOT, "config/puma.rb"), File.join(ROOT, "config.ru")]).run
   end
 
+  def browser
+    token = File.read(config.menu_token_path).strip
+    url = "http://127.0.0.1:#{config.port}/#token=#{URI.encode_www_form_component(token)}"
+    # Pass the opening script on stdin, so the token is not in process arguments.
+    IO.popen(["/usr/bin/osascript"], "w") { |io| io.write("open location #{JSON.generate(url)}\n") }
+    abort "error: could not open your browser" unless $?.success?
+  rescue Errno::ENOENT
+    abort "error: start the service first (bin/coder-notify server)"
+  end
+
   # Looks the workspace up with `coder list` (to get its stable id) and
   # creates a token for it. Nothing is sent to the workspace.
   def enable(name)
@@ -73,6 +89,21 @@ module CoderNotifyCLI
   def token(name)
     entry = tokens.entries.find { |e| e.workspace_name == name } || abort("error: #{name} is not enabled; run: bin/coder-notify enable #{name}")
     print_remote_config(entry)
+  end
+
+  def setup(argv)
+    options = { agent: "both", install_deps: false }
+    parser = OptionParser.new do |opts|
+      opts.banner = "Usage: bin/coder-notify setup NAME [--agent both|claude|codex] [--install-deps]"
+      opts.on("--agent AGENT", %w[both claude codex], "Agents to configure (default: both)") { |value| options[:agent] = value }
+      opts.on("--install-deps", "Install missing dependencies via apt-get (root/passwordless sudo)") { options[:install_deps] = true }
+      opts.on("-h", "--help", "Show help") { puts opts; return }
+    end
+    parser.parse!(argv)
+    abort parser.to_s unless argv.size == 1
+    CoderNotify::WorkspaceSetup.new(config: config, root: ROOT).call(argv.first, **options)
+  rescue OptionParser::ParseError, CoderNotify::WorkspaceSetup::Error => e
+    abort "error: #{e.message}"
   end
 
   def disable(name)

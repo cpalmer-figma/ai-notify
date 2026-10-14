@@ -39,15 +39,14 @@ module TestHelpers
     CoderNotify::Event.from_payload(payload(type: type, **overrides))
   end
 
-  # A Service with no real Coder, notifications, SwiftBar or processes.
+  # A Service with no real Coder, notifications or processes.
   def build_service(home, notifier_backend: nil, discovery: FakeDiscovery.new)
     CoderNotify::Service.new(
       config: CoderNotify::Config.new("CODER_NOTIFY_HOME" => home),
       logger: Logger.new(File::NULL),
       discovery: discovery,
       notifier_backend: notifier_backend,
-      spawner: NullSpawner.new,
-      menu_refresher: Object.new.tap { |fake| def fake.refresh = nil }
+      spawner: NullSpawner.new
     )
   end
 

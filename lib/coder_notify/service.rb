@@ -19,7 +19,7 @@ module CoderNotify
   #   * Puma request threads      - handle HTTP (see App)
   #   * discovery loop            - runs `coder list` every discovery_interval
   #   * tunnel loop               - starts/restarts tunnels every few seconds
-  #   * change worker             - posts notifications and refreshes SwiftBar
+  #   * change worker             - posts notifications
   #   * per tunnel: output reader and exit waiter threads (ProcessSpawner)
   class Service
     TUNNEL_CHECK_INTERVAL = 3
@@ -27,7 +27,7 @@ module CoderNotify
     attr_reader :config, :sessions, :workspaces, :tokens, :menu_token, :tunnels, :logger
 
     def initialize(config: Config.new, logger: Logger.new($stdout), discovery: nil, notifier_backend: :default,
-                   spawner: ProcessSpawner.new, menu_refresher: nil)
+                   spawner: ProcessSpawner.new)
       @config = config
       @logger = logger
       config.ensure_home!
@@ -39,10 +39,8 @@ module CoderNotify
       @discovery = discovery || WorkspaceDiscovery.new(coder_bin: config.coder_bin)
       @notifier = Notifier.new(backend: build_notifier_backend(notifier_backend), logger: logger)
       @notifier.adopt(@sessions.sessions)
-      @menu_refresher = menu_refresher || MenuRefresher.new(plugin_name: config.swiftbar_plugin_name)
       @change_worker = ChangeWorker.new(logger: logger) do
         @notifier.sync(@sessions.sessions)
-        @menu_refresher.refresh
       end
       @tunnels = TunnelSupervisor.new(config: config, spawner: spawner, logger: logger,
                                       on_change: -> { changed! })
@@ -64,7 +62,7 @@ module CoderNotify
       @tunnels.stop_all
     end
 
-    # Something the menu or notifications show has changed.
+    # Something the dashboard or notifications show has changed.
     def changed! = @change_worker.changed!
 
     # One discovery pass: run `coder list`, update the workspace list, and
@@ -90,7 +88,7 @@ module CoderNotify
       @tunnels.reconcile(@workspaces.workspaces, @tokens.entries.map(&:workspace_id))
     end
 
-    # Everything the SwiftBar plugin needs, as returned by GET /sessions.
+    # Everything the browser dashboard needs, as returned by GET /sessions.
     def snapshot
       sessions = @sessions.sessions
       {

@@ -38,7 +38,7 @@ module CoderNotify
     # Rebuilds a Workspace from the hash we saved with #to_h.
     def self.from_h(hash) = new(**hash.transform_keys(&:to_sym))
 
-    # One simple word for the menu and for tunnel decisions.
+    # One simple word for the dashboard and for tunnel decisions.
     def state
       case build_status
       when "running"

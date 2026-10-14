@@ -1,0 +1,53 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+        A20000000000000000000001 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarIcon.swift; sourceTree = "<group>"; };
+        A20000000000000000000002 = { isa = PBXBuildFile; fileRef = A20000000000000000000001; };
+        A10000000000000000000001 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceLaunch.swift; sourceTree = "<group>"; };
+        A10000000000000000000002 = { isa = PBXBuildFile; fileRef = A10000000000000000000001; };
+        A10000000000000000000003 = { isa = PBXBuildFile; fileRef = A10000000000000000000001; };
+		D03F598DC69DB3CDD59B7630 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoderNotifyApp.swift; sourceTree = "<group>"; };
+		D22B132149A025610642FD1F = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		C7F35886C2218AB43829E37E = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
+		1CC326AC7BD7880DDEECA3A9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		F2197E9B246283EB2518FEF9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceClient.swift; sourceTree = "<group>"; };
+		06271BAF49532C879AA3C58B = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A56472E961F58FFFAE622D5B = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceClientTests.swift; sourceTree = "<group>"; };
+		AE0042EC290704DA7E641B97 = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Coder Notify.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E7F08BCC397888750F5CB9BD = { isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoderNotifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD29276F678D784E63F39E86 = { isa = PBXBuildFile; fileRef = D03F598DC69DB3CDD59B7630; };
+		6DCD2CA582FA5891CAE9FA7A = { isa = PBXBuildFile; fileRef = D22B132149A025610642FD1F; };
+		B11F51D41CCF05B7A5573908 = { isa = PBXBuildFile; fileRef = C7F35886C2218AB43829E37E; };
+		BE6E2EB4F21E6E6AB644DF35 = { isa = PBXBuildFile; fileRef = 1CC326AC7BD7880DDEECA3A9; };
+		F1DBAA3944E65CF7A5929906 = { isa = PBXBuildFile; fileRef = F2197E9B246283EB2518FEF9; };
+		2463122D7731127A2BEDA01F = { isa = PBXBuildFile; fileRef = 1CC326AC7BD7880DDEECA3A9; };
+		0893AC4A6D4903CC26C7CC58 = { isa = PBXBuildFile; fileRef = F2197E9B246283EB2518FEF9; };
+		833FFBA806F4D756AEF090A3 = { isa = PBXBuildFile; fileRef = A56472E961F58FFFAE622D5B; };
+		E17E80AD8E2103CF3FC3FD96 = { isa = PBXGroup; children = (A20000000000000000000001, A10000000000000000000001, D03F598DC69DB3CDD59B7630, D22B132149A025610642FD1F, C7F35886C2218AB43829E37E, 1CC326AC7BD7880DDEECA3A9, F2197E9B246283EB2518FEF9, 06271BAF49532C879AA3C58B,); path = CoderNotify; sourceTree = "<group>"; };
+		781CAA6738A604344AE86EE3 = { isa = PBXGroup; children = (A56472E961F58FFFAE622D5B,); path = CoderNotifyTests; sourceTree = "<group>"; };
+		0A3E27B8CA818264D75C8D81 = { isa = PBXGroup; children = (AE0042EC290704DA7E641B97, E7F08BCC397888750F5CB9BD,); name = Products; sourceTree = "<group>"; };
+		0D6E4079E36703EBD37C0072 = { isa = PBXGroup; children = (E17E80AD8E2103CF3FC3FD96, 781CAA6738A604344AE86EE3, 0A3E27B8CA818264D75C8D81,); sourceTree = "<group>"; };
+		6BAB02B549A96CC50D0CA977 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A20000000000000000000002, A10000000000000000000002, AD29276F678D784E63F39E86, 6DCD2CA582FA5891CAE9FA7A, B11F51D41CCF05B7A5573908, BE6E2EB4F21E6E6AB644DF35, F1DBAA3944E65CF7A5929906,); runOnlyForDeploymentPostprocessing = 0; };
+		093A8EEF16CCA81BE763994D = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		DAB7151652C25D9B83C5FD83 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		798B65A4B63A4D08FDD4C755 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000003, 2463122D7731127A2BEDA01F, 0893AC4A6D4903CC26C7CC58, 833FFBA806F4D756AEF090A3,); runOnlyForDeploymentPostprocessing = 0; };
+		497639E2F38DB3F946CE62A2 = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		14F0309E5479D955E2A2D11E = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		73EBF6644258C120893E685D = { isa = XCBuildConfiguration; buildSettings = {SDKROOT = macosx; MACOSX_DEPLOYMENT_TARGET = 13.0; SWIFT_VERSION = 5.0; CLANG_ENABLE_MODULES = YES; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_TESTABILITY = YES; }; name = Debug; };
+		0B0C687DF8B6B8DC790B519C = { isa = XCBuildConfiguration; buildSettings = {SDKROOT = macosx; MACOSX_DEPLOYMENT_TARGET = 13.0; SWIFT_VERSION = 5.0; CLANG_ENABLE_MODULES = YES; SWIFT_OPTIMIZATION_LEVEL = "-O"; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; }; name = Release; };
+		9879E227F5AD614B3D33074F = { isa = XCConfigurationList; buildConfigurations = (73EBF6644258C120893E685D, 0B0C687DF8B6B8DC790B519C,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+		B00CCDD09424E369308D67FA = { isa = XCBuildConfiguration; buildSettings = {PRODUCT_NAME = "Coder Notify"; PRODUCT_MODULE_NAME = CoderNotify; PRODUCT_BUNDLE_IDENTIFIER = dev.coder-notify.menubar; INFOPLIST_FILE = CoderNotify/Info.plist; CODE_SIGN_STYLE = Automatic; CODE_SIGN_IDENTITY = "-"; ENABLE_APP_SANDBOX = NO; ENABLE_HARDENED_RUNTIME = YES; COMBINE_HIDPI_IMAGES = YES; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_TESTABILITY = YES; }; name = Debug; };
+		1B104479E55E37CF8A63CBDF = { isa = XCBuildConfiguration; buildSettings = {PRODUCT_NAME = "Coder Notify"; PRODUCT_MODULE_NAME = CoderNotify; PRODUCT_BUNDLE_IDENTIFIER = dev.coder-notify.menubar; INFOPLIST_FILE = CoderNotify/Info.plist; CODE_SIGN_STYLE = Automatic; CODE_SIGN_IDENTITY = "-"; ENABLE_APP_SANDBOX = NO; ENABLE_HARDENED_RUNTIME = YES; COMBINE_HIDPI_IMAGES = YES; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks"; SWIFT_OPTIMIZATION_LEVEL = "-O"; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; }; name = Release; };
+		61571F3444EB024BEA54E0A2 = { isa = XCConfigurationList; buildConfigurations = (B00CCDD09424E369308D67FA, 1B104479E55E37CF8A63CBDF,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+		DD3F495F7D6A5AA1C1769021 = { isa = XCBuildConfiguration; buildSettings = {PRODUCT_NAME = "$(TARGET_NAME)"; PRODUCT_BUNDLE_IDENTIFIER = dev.coder-notify.tests; GENERATE_INFOPLIST_FILE = YES; CODE_SIGN_STYLE = Automatic; CODE_SIGN_IDENTITY = "-"; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/../Frameworks @executable_path/../Frameworks"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_TESTABILITY = YES; }; name = Debug; };
+		E670BC2FFE794172EBC92AE3 = { isa = XCBuildConfiguration; buildSettings = {PRODUCT_NAME = "$(TARGET_NAME)"; PRODUCT_BUNDLE_IDENTIFIER = dev.coder-notify.tests; GENERATE_INFOPLIST_FILE = YES; CODE_SIGN_STYLE = Automatic; CODE_SIGN_IDENTITY = "-"; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/../Frameworks @executable_path/../Frameworks"; SWIFT_OPTIMIZATION_LEVEL = "-O"; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; }; name = Release; };
+		5629210D75042E670BBE3816 = { isa = XCConfigurationList; buildConfigurations = (DD3F495F7D6A5AA1C1769021, E670BC2FFE794172EBC92AE3,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+		E7A3CDEFEB9193C848ACCD43 = { isa = PBXNativeTarget; buildConfigurationList = 61571F3444EB024BEA54E0A2; buildPhases = (6BAB02B549A96CC50D0CA977, 093A8EEF16CCA81BE763994D, DAB7151652C25D9B83C5FD83,); buildRules = (); dependencies = (); name = CoderNotify; productName = "Coder Notify"; productReference = AE0042EC290704DA7E641B97; productType = "com.apple.product-type.application"; };
+		E5B4A42C1A9B11F842B19C64 = { isa = PBXNativeTarget; buildConfigurationList = 5629210D75042E670BBE3816; buildPhases = (798B65A4B63A4D08FDD4C755, 497639E2F38DB3F946CE62A2, 14F0309E5479D955E2A2D11E,); buildRules = (); dependencies = (); name = CoderNotifyTests; productName = CoderNotifyTests; productReference = E7F08BCC397888750F5CB9BD; productType = "com.apple.product-type.bundle.unit-test"; };
+		244210E48437B6556980A702 = { isa = PBXProject; attributes = { LastUpgradeCheck = 2700; }; buildConfigurationList = 9879E227F5AD614B3D33074F; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base); mainGroup = 0D6E4079E36703EBD37C0072; productRefGroup = 0A3E27B8CA818264D75C8D81; projectDirPath = ""; projectRoot = ""; targets = (E7A3CDEFEB9193C848ACCD43, E5B4A42C1A9B11F842B19C64,); };
+	};
+	rootObject = 244210E48437B6556980A702;
+}

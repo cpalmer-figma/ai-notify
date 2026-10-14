@@ -1,30 +1,16 @@
 # coder-notify
 
-A macOS menu bar indicator for **Claude Code** and **Codex CLI** sessions running in **tmux** on your **Coder workspaces**.
+A local browser dashboard for **Claude Code** and **Codex CLI** sessions running in **tmux** on your **Coder workspaces**.
 
-When an agent finishes responding, asks for permission or asks a question, a count appears next to your other menu bar icons. Optionally, a macOS notification appears too. The dropdown shows which agent is waiting, on which workspace and tmux pane, and why. Switch to that tmux pane and the entry and its notification clear.
+The dashboard lists all your Coder machines with status circles: green for running and reachable, red for stopped, failed or deleting, yellow for starting or unreachable, and gray for unknown states. Notification connection status appears separately under each machine.
 
-```
-🔔 2
-──────────────────────────────────────────────────────────────
-Needs attention (2)
-  Claude · api-work · main:1.0 — Needs permission (3m)        ▸  Dismiss / Copy tmux target
-  Codex · experiments · work:2.1 — Finished responding (just now)
-Seen (1)
-  Claude · api-work · main:2.0 · Finished responding
-Working (1)                                                    ▸
-──────────────────────────────────────────────────────────────
-Workspaces
-  api-work — connected
-  experiments — not enabled                                    ▸  not set up; see README …
-  old-box — stopped
-──────────────────────────────────────────────────────────────
-Dismiss all · Refresh · Open README
-```
+When an agent finishes responding, asks for permission or asks a question, the dashboard shows which workspace and tmux pane need attention. Optionally, a macOS notification appears too. Focusing the pane or clicking **Dismiss** marks the alert as seen; submitting a new prompt marks the agent as working.
 
-This is version 1. It **discovers** your workspaces automatically, but it **never installs anything on them**. You set up each workspace by hand with the steps below. It also never starts a stopped workspace.
+The dashboard refreshes every five seconds. Workspace discovery runs every minute. Discovery never changes workspaces or starts stopped ones. Run `bin/coder-notify setup NAME` explicitly to install remote hooks on a running workspace.
 
-It is also a small, readable Ruby project: Sinatra + Puma for the service, a SwiftBar plugin written in Ruby, Minitest for tests, and one bash script on each workspace.
+The service uses Ruby with Sinatra + Puma, plain HTML and JavaScript for the browser, Minitest for tests, and one Bash script on each workspace. An optional native macOS menu bar app is in [macos/](macos/README.md).
+
+To run the native menu bar app locally, open `macos/CoderNotify.xcodeproj` in Xcode, select **CoderNotify → My Mac**, and press **⌘R**. It starts the Ruby service if needed and shows all machines with colored status dots. Use its **Quit** button to stop the app and any service it started.
 
 ## Contents
 
@@ -60,7 +46,7 @@ flowchart LR
     D["coder list"] --> S
     S --> F[("~/.coder-notify")]
     S --> N["terminal-notifier"]
-    S -->|"refresh"| B["SwiftBar Ruby plugin"]
+    B["Local browser dashboard"]
     B -->|"GET /sessions"| S
   end
   L ==>|"SSH reverse tunnel"| T
@@ -75,8 +61,8 @@ flowchart LR
 - **On the Mac**, a Sinatra app runs under Puma, bound to `127.0.0.1` only. It has three jobs:
   - **Discovery:** it runs `coder list --output json` at startup and every minute to find your workspaces.
   - **Tunnels:** for each workspace you have *enabled*, and only while it is running with a connected agent, it keeps one `coder ssh -R 47290:127.0.0.1:47290 <workspace>.<agent>` process alive. It restarts that process if it breaks.
-  - **Events:** it checks each event's token, updates its state (saved to `~/.coder-notify/state.json`), posts or removes macOS notifications, and asks SwiftBar to redraw.
-- **SwiftBar** shows the icon and runs `swiftbar/coder-notify.1m.rb`. That plugin reads `GET /sessions` and prints the menu.
+  - **Events:** it checks each event's token, updates its state (saved to `~/.coder-notify/state.json`), posts or removes macOS notifications.
+- **The browser dashboard** reads `GET /sessions` every five seconds. Run `bin/coder-notify browser` to open it with an authenticated browser session.
 
 ### Event and state workflow
 
@@ -85,7 +71,7 @@ sequenceDiagram
   participant A as Agent + tmux
   participant R as coder-notify-remote
   participant S as Mac service
-  participant U as Menu + notification
+  participant U as Dashboard + notification
   A->>R: Stop hook or permission prompt
   R->>S: waiting
   S->>U: count +1, post notification
@@ -139,7 +125,7 @@ An agent instance is identified by **Coder workspace id + tmux pane id + agent t
 - **Agent type:** `claude` or `codex`.
 - **Session id:** from the hook.
 
-The label shown in the menu (for example `main:1.0`) comes from `tmux display-message -p -t "$TMUX_PANE" '#{session_name}:#{window_index}.#{pane_index}'`.
+The label shown in the dashboard (for example `main:1.0`) comes from `tmux display-message -p -t "$TMUX_PANE" '#{session_name}:#{window_index}.#{pane_index}'`.
 
 A tmux pane runs one agent at a time. When a new session appears in a pane, older sessions recorded for that pane are dropped.
 
@@ -154,7 +140,7 @@ A tmux pane runs one agent at a time. When a new session appears in a pane, olde
   - The token authenticates `POST /events` and **identifies the workspace**, so one workspace can't post events as another.
   - A token copied to the wrong workspace is caught, because the event's `CODER_WORKSPACE_NAME` must match.
   - On the workspace, `curl` reads the token from a pipe (`-K`), so it never appears in `ps`.
-- **The menu has its own token** (`~/.coder-notify/menu-token`). Only that token can read `GET /sessions` or dismiss entries, so a workspace can't see your other workspaces through its tunnel.
+- **The dashboard has its own token** (`~/.coder-notify/menu-token`). Only that token (or its authenticated browser cookie) can read `GET /sessions` or dismiss entries, so a workspace can't see your other workspaces through its tunnel. The browser launcher passes this token in a URL fragment (never sent in the HTTP request); the page immediately clears it and exchanges it for an HttpOnly, SameSite=Strict session cookie. The public dashboard HTML contains no tokens or workspace data.
 - **Validated, tiny payloads.**
   - JSON only, 64 KB maximum.
   - Fixed allowed values for `type`, `agent` and `reason`.
@@ -175,7 +161,6 @@ A tmux pane runs one agent at a time. When a new session appears in a pane, olde
 | In this repository | Installed at | Where | By |
 | --- | --- | --- | --- |
 | `bin/coder-notify`, `lib/`, `config.ru`, `config/puma.rb` | run from the repository | Mac | – |
-| `swiftbar/coder-notify.1m.rb` | symlink in your SwiftBar plugin folder | Mac | you |
 | `launchd/dev.coder-notify.plist.example` | `~/Library/LaunchAgents/dev.coder-notify.plist` (optional) | Mac | you |
 | (created by the service) | `~/.coder-notify/` (`tokens.json`, `menu-token`, `state.json`, `workspaces.json`, `logs/`) | Mac | service |
 | `remote/bin/coder-notify-remote` | `~/.local/bin/coder-notify-remote` | workspace | you |
@@ -198,7 +183,6 @@ A tmux pane runs one agent at a time. When a new session appears in a pane, olde
 | Ruby 3.4.7 (pinned in `.ruby-version`) | `ruby -v` in the repository | `rbenv install 3.4.7` |
 | Bundler | `bundle -v` | ships with Ruby 3.4 |
 | Coder CLI, logged in | `coder version && coder list` | https://coder.com/docs/install, then `coder login <your deployment URL>` |
-| SwiftBar | `ls /Applications/SwiftBar.app` | `brew install --cask swiftbar` |
 | jq (for the tests and the remote merge steps) | `jq --version` | `brew install jq` |
 
 The `terminal-notifier` gem (3.1) bundles an ad-hoc-signed, universal (Apple silicon and Intel) `terminal-notifier.app`, so you don't need Homebrew's `terminal-notifier`.
@@ -225,25 +209,19 @@ lsof -nP -iTCP:47290 -sTCP:LISTEN              # must show 127.0.0.1:47290, noth
 bin/coder-notify status                        # workspaces from `coder list`, all "not enabled"
 ```
 
-The first start creates `~/.coder-notify/` (mode 700) and the menu token.
+The first start creates `~/.coder-notify/` (mode 700) and the dashboard token.
 
-### 4. Install the SwiftBar plugin
+### 4. Open the browser dashboard
 
-1. Open SwiftBar once. When it asks for a plugin folder, create and pick one, for example `~/SwiftBarPlugins`.
-2. Link the plugin into that folder, keeping its file name:
+With the service running, open another terminal in the repository:
 
-   ```sh
-   ln -s ~/work/coder-notify/swiftbar/coder-notify.1m.rb ~/SwiftBarPlugins/coder-notify.1m.rb
-   ```
+```sh
+bin/coder-notify browser
+```
 
-3. Choose **Refresh All** from any SwiftBar menu. A bell appears in the menu bar.
+This opens `http://127.0.0.1:47290` in your default browser and authenticates it automatically. Keep the tab pinned if you want it handy. No additional app or browser extension is needed. All discovered machines appear even before remote hooks are installed.
 
-Notes:
-- The file name matters:
-  - `coder-notify` is the name the service uses to trigger an instant refresh (`open -g swiftbar://refreshplugin?name=coder-notify`).
-  - `.1m.` makes SwiftBar also refresh every minute, which keeps the "(3m)" ages current.
-- The plugin uses only Ruby's standard library and works with any Ruby 2.6 or newer, including `/usr/bin/ruby`. It declares `<swiftbar.runInBash>false</swiftbar.runInBash>`, so SwiftBar runs it directly instead of through `bash -l`.
-- If you ever change `CODER_NOTIFY_PORT` or `CODER_NOTIFY_HOME`, change the defaults at the top of the plugin to match.
+If you open the URL directly before authenticating, the page tells you to run the browser command. Run it again if the browser session is cleared.
 
 ### 5. Notifications (optional)
 
@@ -267,7 +245,7 @@ If nothing appears:
 
 Clicking a notification brings Ghostty (`com.mitchellh.ghostty`) to the front. Set `CODER_NOTIFY_ACTIVATE` to another bundle id to change that, for example `com.cmuxterm.app`.
 
-**To run without notifications,** start the service with `CODER_NOTIFY_NOTIFICATIONS=0`. The menu works the same either way.
+**To run without notifications,** start the service with `CODER_NOTIFY_NOTIFICATIONS=0`. The dashboard works the same either way.
 
 ### 6. Run it at login (optional)
 
@@ -300,13 +278,39 @@ All settings are environment variables; defaults are in `lib/coder_notify/config
 | `CODER_NOTIFY_DISCOVERY_INTERVAL` | `60` | seconds between `coder list` runs |
 | `CODER_NOTIFY_NOTIFICATIONS` | `1` | `0` turns macOS notifications off |
 | `CODER_NOTIFY_ACTIVATE` | `com.mitchellh.ghostty` | app brought forward when you click a notification |
-| `CODER_NOTIFY_SWIFTBAR_PLUGIN` | `coder-notify` | plugin name used for instant refresh |
 
 ---
 
 ## Remote workspace setup (repeat per workspace)
 
-Do these steps by hand for each workspace you want monitored. Nothing here is automated, and the Mac never changes a workspace.
+The recommended setup is one command from this repository on your Mac:
+
+```sh
+bin/coder-notify setup product-trials --install-deps
+```
+
+Replace `product-trials` with the name shown by `coder list`. The workspace must already be running with a connected main agent. The setup command passes `--disable-autostart` on every SSH connection, so it will not start a stopped workspace, including if its state changes during setup. No SSH alias configuration or `scp` is needed.
+
+This command checks remote dependencies and existing configuration, securely uploads the reporter and workspace token, merges Claude/Codex hooks without replacing other settings, installs the tmux focus hook, applies it to a running tmux server, and enables monitoring on the Mac. Rerunning it updates the installation without duplicating hooks. Original files are backed up under `~/.config/coder-notify/backups/` on the workspace, and existing dotfile symlinks are preserved. Credentials travel over SSH stdin and are not printed or put in process arguments.
+
+By default it configures both Claude and Codex. To configure just one:
+
+```sh
+bin/coder-notify setup product-trials --agent codex --install-deps
+bin/coder-notify setup product-trials --agent claude --install-deps
+```
+
+`--install-deps` installs missing `bash`, `curl`, `jq`, `tmux` and `tar` using apt-get, if root or passwordless sudo is available. Omit the flag to check dependencies without installing packages. Unsupported package managers, missing sudo access, invalid existing JSON, disabled Claude hooks, or unsupported Codex hooks produce an actionable error before the Mac enables a new workspace.
+
+For Codex versions with `--no-daemon`, setup adds `~/.local/bin/coder-notify-codex` and a managed alias to `.bashrc` and `.zshrc`. Existing custom Codex aliases/functions are preserved; if one exists, the command tells you to use that wrapper instead. Open a new shell to pick up the alias, restart existing agent sessions, and reattach tmux once for focus reporting.
+
+**Codex requires one trust review:** run `/hooks` inside Codex and review/trust the coder-notify commands. The installer does not rewrite trust records or bypass this check. See the [official hook trust documentation](https://learn.chatgpt.com/docs/hooks). After that, the same hook definitions do not need a new review on each installer run.
+
+Keep the menu bar app or Ruby service running while using alerts. Setup also works while the Mac service is stopped; its tunnel starts the next time the service runs. A new workspace created later can be set up with the same command and its new name. A recreated workspace gets a new token automatically.
+
+### Manual setup alternative
+
+The following steps are an alternative if you prefer to inspect and install each piece yourself.
 
 The commands use the host names written by `coder config-ssh` (`Host coder.*`).
 
@@ -335,7 +339,7 @@ bin/coder-notify enable $WS
 
 This looks up the workspace's Coder id and creates its token. It prints a small block of shell commands that create `~/.config/coder-notify/env` on the workspace; you'll paste it in step 4.
 
-`bin/coder-notify token $WS` prints it again. Within a few seconds the Mac starts trying to tunnel to the workspace. Until you finish the steps below, the menu shows "remote not installed" (or "not configured"), and it retries every 5 minutes.
+`bin/coder-notify token $WS` prints it again. Within a few seconds the Mac starts trying to tunnel to the workspace. Until you finish the steps below, the dashboard shows "remote not installed" (or "not configured"), and it retries every 5 minutes.
 
 ### 3. Copy the files from the Mac
 
@@ -451,17 +455,17 @@ curl -s http://127.0.0.1:47290/health                                   # {"ok":
 ~/.local/bin/coder-notify-remote check                                  # health includes "workspace":"<name>"
 ```
 
-If the menu shows a problem instead, see [Troubleshooting](#troubleshooting).
+If the dashboard shows a problem instead, see [Troubleshooting](#troubleshooting).
 
 ---
 
 ## When you create a new Coder workspace
 
-The Mac finds new workspaces automatically, within a minute, through `coder list`. They appear in the menu as **not enabled**. **Nothing is installed or changed on them.** To monitor one, repeat [Remote workspace setup](#remote-workspace-setup-repeat-per-workspace), steps 1–8, with `WS=<new name>`.
+The Mac finds new workspaces automatically, within a minute, through `coder list`. They appear in the dashboard as **not enabled**. **Nothing is installed or changed by discovery.** To monitor one, run `bin/coder-notify setup <new name> --install-deps` and complete the one-time Codex `/hooks` trust review if using Codex.
 
-When a workspace is deleted, it disappears from the menu at the next discovery, along with its sessions and its tunnel.
+When a workspace is deleted, it disappears from the dashboard at the next discovery, along with its sessions and its tunnel.
 
-If you delete a workspace and create a new one with the same name, it gets a new Coder id. Run `bin/coder-notify enable <name>` again: this replaces the old token. Then update `~/.config/coder-notify/env` on the new workspace, and repeat the rest of the setup there.
+If you delete a workspace and create a new one with the same name, it gets a new Coder id. Run `bin/coder-notify setup <name> --install-deps` again: this replaces the old token and installs the new workspace's files.
 
 ---
 
@@ -469,7 +473,7 @@ If you delete a workspace and create a new one with the same name, it gets a new
 
 This shows an entry appearing, its notification being posted, and both clearing when you return to the pane.
 
-1. **Setup.** The Mac service is running (`bin/coder-notify status`) and the SwiftBar bell is visible. The workspace shows **connected**.
+1. **Setup.** The Mac service is running (`bin/coder-notify status`) and the browser dashboard is open. The workspace shows **Notifications: connected**.
 2. **Two panes.** In Ghostty, `ssh coder.$WS.workspace`, then `tmux new -s demo`, then split the window with `Ctrl-b %`. You now have panes `demo:0.0` and `demo:0.1`.
 3. **Simulate an agent in pane 0.** This needs no agent. The `sleep` gives you time to look away, because a wait that starts while you are looking at the pane counts as already seen:
 
@@ -479,11 +483,11 @@ This shows an entry appearing, its notification being posted, and both clearing 
    ```
 
    Press Enter, then immediately press `Ctrl-b o` to move to pane 1.
-4. **An entry appears.** Within about a second:
-   - the menu bar shows **1**;
-   - the dropdown lists **Claude · $WS · demo:0.0 — Needs permission**;
+4. **An entry appears.** Within about five seconds:
+   - the dashboard attention count shows **1**;
+   - the agent activity list shows **Claude · $WS · demo:0.0 — Needs permission**;
    - a macOS notification **"Claude on $WS"** appears.
-5. **Return to pane 0** (`Ctrl-b o`). Both clear: the count disappears, the entry moves to **Seen**, and the notification is removed from Notification Center.
+5. **Return to pane 0** (`Ctrl-b o`). Both clear: the count becomes zero, the entry becomes **Seen**, and the notification is removed from Notification Center.
 6. **Resume.** In pane 0, run:
 
    ```sh
@@ -536,19 +540,18 @@ Your `*.before-coder-notify` backups are still there if you want to compare.
 bin/coder-notify disable <workspace>            # for each enabled workspace (stops its tunnel)
 launchctl bootout gui/$(id -u)/dev.coder-notify 2>/dev/null
 rm -f ~/Library/LaunchAgents/dev.coder-notify.plist
-rm -f ~/SwiftBarPlugins/coder-notify.1m.rb      # your SwiftBar plugin folder
 rm -rf ~/.coder-notify
 ```
 
-Optionally, remove terminal-notifier under **System Settings › Notifications**, and uninstall SwiftBar (`brew uninstall --cask swiftbar`).
+Optionally, remove terminal-notifier under **System Settings › Notifications**.
 
 ---
 
 ## Troubleshooting
 
-**Menu shows a slashed bell and "service is not running".** Start `bin/coder-notify server`, or check `launchctl print gui/$(id -u)/dev.coder-notify` and `~/.coder-notify/logs/service.log`.
+**Dashboard cannot reach the service.** Start `bin/coder-notify server`, or check `launchctl print gui/$(id -u)/dev.coder-notify` and `~/.coder-notify/logs/service.log`.
 
-**Workspace states in the menu** (and `bin/coder-notify status`):
+**Notification connection states in the dashboard** (and `bin/coder-notify status`):
 
 | State | Meaning | What to do |
 | --- | --- | --- |
@@ -566,7 +569,7 @@ Optionally, remove terminal-notifier under **System Settings › Notifications**
 
 **"tcpip-forward request denied".** The workspace still has a listener from an old tunnel that didn't close cleanly, for example after the Mac slept or lost the network. The Coder agent frees it once it notices the old connection is dead, which can take many minutes. The Mac keeps retrying (every 60 s at most), and events are queued on the workspace in the meantime.
 
-**Workspace discovery failed.** The menu keeps the last known list. Check the command yourself: run `coder list` in a terminal (`coder login` if needed). Under launchd, also check `CODER_BIN` in the plist.
+**Workspace discovery failed.** The dashboard keeps the last known list. Check the command yourself: run `coder list` in a terminal (`coder login` if needed). Under launchd, also check `CODER_BIN` in the plist.
 
 **Codex events never arrive.** Check `~/.cache/coder-notify/remote.log` on the workspace:
 - If it says "not running inside pane", start Codex with `--no-daemon` (see step 6).
@@ -616,15 +619,16 @@ shellcheck remote/bin/coder-notify-remote
 | `lib/coder_notify/workspace_directory.rb` | last known list, discovery errors, added/removed |
 | `lib/coder_notify/event.rb` | payload validation |
 | `lib/coder_notify/session_store.rb` | the state machine, duplicates, ordering, persistence |
-| `lib/coder_notify/token_store.rb` | per-workspace tokens and the menu token |
+| `lib/coder_notify/token_store.rb` | per-workspace tokens and the dashboard token |
 | `lib/coder_notify/notifier.rb` | keeps notifications in step with state (terminal-notifier) |
 | `lib/coder_notify/tunnel_planner.rb` | pure "which tunnels should exist" rules |
 | `lib/coder_notify/tunnel_supervisor.rb` | runs and restarts `coder ssh -R` processes |
-| `lib/coder_notify/change_worker.rb` | background notifications and SwiftBar refresh |
+| `lib/coder_notify/change_worker.rb` | background notifications |
 | `lib/coder_notify/service.rb` | wires it all together; discovery and tunnel loops |
-| `lib/coder_notify/app.rb` | the Sinatra routes |
+| `lib/coder_notify/app.rb` | the Sinatra routes and browser session authentication |
+| `dashboard/` | the browser interface |
 
-The tests use fakes instead of Coder, SwiftBar, notifications and processes:
+The tests use fakes instead of Coder, notifications and processes:
 - `test/fixtures/coder_list.json` is real (sanitized) `coder list` output.
 - `test/support/bin/` has fake `curl` and `tmux` for the remote script tests.
 
@@ -644,6 +648,5 @@ Checked in September 2026, against the versions installed on this Mac.
   - https://learn.chatgpt.com/docs/hooks (formerly developers.openai.com/codex/hooks) and https://learn.chatgpt.com/docs/config-file/config-advanced#notifications.
   - The `rust-v0.157.0` source for the hook runner and the shared background server.
 - **tmux 3.7c:** the man page (`set-hook`, `pane-focus-in`, `focus-events`, `run-shell -b`, formats), checked against a local tmux 3.7c.
-- **SwiftBar v2.1.1:** https://github.com/swiftbar/SwiftBar (plugin naming, output format, metadata, `swiftbar://refreshplugin`).
 - **terminal-notifier gem 3.1.0:** https://github.com/julienXX/terminal-notifier (`Ruby/README.markdown`, `-group`, `-remove`, `-activate`, `-diagnose`).
 - **Ghostty:** focus reporting (DECSET 1004), checked in the source.

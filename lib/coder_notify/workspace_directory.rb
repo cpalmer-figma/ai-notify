@@ -5,9 +5,9 @@ require_relative "workspace"
 module CoderNotify
   # Remembers the most recent successful workspace list and the latest
   # discovery error. If `coder list` fails we keep the old list (so tunnels
-  # and the menu keep working) and just record the error.
+  # and the dashboard keep working) and just record the error.
   #
-  # The list is saved to disk so the menu has something to show immediately
+  # The list is saved to disk so the dashboard has something to show immediately
   # after a restart, before the first `coder list` finishes.
   class WorkspaceDirectory
     # What changed after applying a discovery result.

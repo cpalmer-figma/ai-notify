@@ -26,16 +26,20 @@ module CoderNotify
     end
 
     # Creates a token for the workspace (or returns the existing one).
-    def enable(workspace)
+    def enable(workspace, token: nil)
+      raise ArgumentError, "invalid workspace token" if token && !token.match?(/\A[0-9a-f]{64}\z/)
       @mutex.synchronize do
         reload
         # A workspace deleted and re-created under the same name gets a new
         # Coder id; the old token is useless, so drop it.
         @entries.delete_if { |id, entry| entry.workspace_name == workspace.name && id != workspace.id }
+        if @entries[workspace.id] && @entries[workspace.id].workspace_name != workspace.name
+          @entries[workspace.id] = @entries[workspace.id].with(workspace_name: workspace.name)
+        end
         entry = @entries[workspace.id] ||= Entry.new(
           workspace_id: workspace.id,
           workspace_name: workspace.name,
-          token: SecureRandom.hex(32),
+          token: token || SecureRandom.hex(32),
           created_at: Time.now.utc.iso8601
         )
         save
@@ -84,7 +88,7 @@ module CoderNotify
     end
   end
 
-  # The menu bar plugin uses its own token for GET /sessions and "Dismiss".
+  # The browser dashboard uses its own token for GET /sessions and "Dismiss".
   # Workspaces never see it, so a workspace can't read your other sessions
   # through its tunnel.
   module MenuToken

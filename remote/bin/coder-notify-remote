@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # coder-notify-remote: the workspace side of coder-notify.
 #
-# Install by hand at ~/.local/bin/coder-notify-remote on each Coder workspace
+# Installed at ~/.local/bin/coder-notify-remote by `bin/coder-notify setup`
 # (see README). Needs bash, curl, jq and tmux. Reads its settings from
 # ~/.config/coder-notify/env.
 #

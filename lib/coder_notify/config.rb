@@ -6,7 +6,7 @@ module CoderNotify
   # to build a Config pointing at a temporary directory.
   class Config
     attr_reader :home, :port, :remote_port, :coder_bin, :discovery_interval,
-                :notifications, :activate_bundle_id, :swiftbar_plugin_name
+                :notifications, :activate_bundle_id
 
     def initialize(env = ENV)
       # Directory for tokens, persisted state and logs.
@@ -19,12 +19,10 @@ module CoderNotify
       @coder_bin = env.fetch("CODER_BIN", "coder")
       # Seconds between `coder list` runs.
       @discovery_interval = Integer(env.fetch("CODER_NOTIFY_DISCOVERY_INTERVAL", "60"))
-      # Set CODER_NOTIFY_NOTIFICATIONS=0 to run with the menu only.
+      # Set CODER_NOTIFY_NOTIFICATIONS=0 to run with the dashboard only.
       @notifications = env.fetch("CODER_NOTIFY_NOTIFICATIONS", "1") != "0"
       # App brought to the front when you click a notification.
       @activate_bundle_id = env.fetch("CODER_NOTIFY_ACTIVATE", "com.mitchellh.ghostty")
-      # Must match the SwiftBar plugin file name without interval/extension.
-      @swiftbar_plugin_name = env.fetch("CODER_NOTIFY_SWIFTBAR_PLUGIN", "coder-notify")
     end
 
     def tokens_path = File.join(home, "tokens.json")
