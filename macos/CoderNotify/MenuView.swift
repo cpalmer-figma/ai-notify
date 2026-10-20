@@ -12,6 +12,9 @@ struct MenuView: View {
                 Button { Task { await model.refresh() } } label: { Image(systemName: "arrow.clockwise") }
                     .buttonStyle(.borderless).help("Refresh")
             }.padding()
+            CreditUsageView(snapshot: model.snapshot, isStale: model.displayError != nil)
+                .padding(.horizontal)
+                .padding(.bottom)
             Divider()
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
@@ -92,6 +95,45 @@ struct MenuView: View {
                 Button("Quit") { model.shutdown(); NSApp.terminate(nil) }
             }.controlSize(.regular).padding()
         }.frame(width: 460)
+    }
+}
+
+private struct CreditUsageView: View {
+    let snapshot: Snapshot?
+    let isStale: Bool
+
+    private var hasUsage: Bool {
+        guard let snapshot else { return false }
+        return snapshot.discovery.listedAt != nil || !snapshot.workspaces.isEmpty
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("Coder credits").fontWeight(.medium)
+                Spacer()
+                if hasUsage, let snapshot {
+                    Text("\(snapshot.creditsUsed) / \(Snapshot.creditLimit)")
+                        .monospacedDigit()
+                } else {
+                    Text("— / \(Snapshot.creditLimit)").foregroundStyle(.secondary)
+                }
+            }.font(.system(size: 14))
+            ProgressView(value: hasUsage ? Double(min(snapshot?.creditsUsed ?? 0, Snapshot.creditLimit)) : 0,
+                         total: Double(Snapshot.creditLimit))
+                .progressViewStyle(.linear)
+                .tint((snapshot?.creditsUsed ?? 0) >= Snapshot.creditLimit ? .orange : .accentColor)
+                .accessibilityLabel("Coder credits used")
+                .accessibilityValue(hasUsage ? "\(snapshot?.creditsUsed ?? 0) of \(Snapshot.creditLimit) credits" : "Usage unavailable")
+            if !hasUsage {
+                Text("Waiting for workspace usage…").foregroundStyle(.secondary)
+            } else if isStale || snapshot?.discovery.error != nil {
+                Text("Last known usage\(snapshot?.creditsEstimated == true ? " · Estimated at 30 credits per active box" : "")")
+                    .foregroundStyle(.secondary)
+            } else if snapshot?.creditsEstimated == true {
+                Text("Estimated at 30 credits per active box").foregroundStyle(.secondary)
+            }
+        }.font(.system(size: 12))
     }
 }
 

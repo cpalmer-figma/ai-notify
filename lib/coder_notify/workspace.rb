@@ -11,8 +11,13 @@ module CoderNotify
     :owner,         # Coder username
     :build_status,  # latest_build.status: "running", "stopped", "starting", ...
     :agent_name,    # the main (top-level) agent, e.g. "workspace"
-    :agent_status   # "connected", "connecting", "disconnected", "timeout" or nil
+    :agent_status,  # "connected", "connecting", "disconnected", "timeout" or nil
+    :daily_cost     # Coder quota credits for the latest build, or nil if unavailable
   ) do
+    def initialize(daily_cost: nil, **attributes)
+      super(**attributes, daily_cost: daily_cost)
+    end
+
     # Parses one workspace hash from `coder list --output json`.
     def self.from_coder_json(hash)
       build = hash.fetch("latest_build", {})
@@ -24,7 +29,8 @@ module CoderNotify
         owner: hash["owner_name"],
         build_status: build["status"] || "unknown",
         agent_name: agent && agent["name"],
-        agent_status: agent && agent["status"]
+        agent_status: agent && agent["status"],
+        daily_cost: build["daily_cost"]
       )
     end
 

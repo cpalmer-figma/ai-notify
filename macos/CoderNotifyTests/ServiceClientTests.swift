@@ -47,6 +47,37 @@ final class ServiceClientTests: XCTestCase {
         catch ClientError.wrongService { }
     }
 
+    func testCreditUsageUsesReportedCostsAndEstimatesMissingActiveCosts() throws {
+        let json = #"""
+        {"attention_count":0,"sessions":[],"discovery":{},"workspaces":[
+          {"id":"a","name":"large","state":"running","daily_cost":90,"monitoring":{"state":"idle"}},
+          {"id":"b","name":"disconnected","state":"unreachable","monitoring":{"state":"idle"}},
+          {"id":"c","name":"stopped","state":"stopped","monitoring":{"state":"idle"}},
+          {"id":"d","name":"starting","state":"starting","monitoring":{"state":"idle"}},
+          {"id":"e","name":"stopping","state":"stopped","build_status":"stopping","monitoring":{"state":"idle"}},
+          {"id":"f","name":"free","state":"running","daily_cost":0,"monitoring":{"state":"idle"}}
+        ]}
+        """#
+        let snapshot = try JSONDecoder().decode(Snapshot.self, from: Data(json.utf8))
+        XCTAssertEqual(snapshot.creditsUsed, 180)
+        XCTAssertTrue(snapshot.creditsEstimated)
+        XCTAssertEqual(snapshot.workspaces.map(\.creditsUsed), [90, 30, 0, 30, 30, 0])
+    }
+
+    func testCreditUsageKeepsTotalsAboveLimitAndEmptyUsageIsZero() throws {
+        let json = #"""
+        {"attention_count":0,"sessions":[],"discovery":{"listed_at":"2026-10-20T12:00:00Z"},"workspaces":[
+          {"id":"a","name":"large","state":"running","daily_cost":420,"monitoring":{"state":"idle"}}
+        ]}
+        """#
+        let snapshot = try JSONDecoder().decode(Snapshot.self, from: Data(json.utf8))
+        XCTAssertEqual(snapshot.creditsUsed, 420)
+        XCTAssertFalse(snapshot.creditsEstimated)
+        let empty = try JSONDecoder().decode(Snapshot.self, from: Data(#"{"attention_count":0,"sessions":[],"discovery":{},"workspaces":[]}"#.utf8))
+        XCTAssertEqual(empty.creditsUsed, 0)
+        XCTAssertFalse(empty.creditsEstimated)
+    }
+
     func testMissingTokenCannotDismiss() async throws {
         try FileManager.default.removeItem(at: tokenURL)
         StubProtocol.handler = { _ in XCTFail("Must not send an unauthenticated request"); return (200, "{}") }

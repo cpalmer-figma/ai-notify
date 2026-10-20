@@ -6,6 +6,10 @@ struct Snapshot: Decodable {
     let workspaces: [Workspace]
     let discovery: Discovery
 
+    var creditsUsed: Int { workspaces.reduce(0) { $0 + $1.creditsUsed } }
+    var creditsEstimated: Bool { workspaces.contains { $0.usesEstimatedCredits } }
+    static let creditLimit = 400
+
     enum CodingKeys: String, CodingKey {
         case attentionCount = "attention_count"
         case sessions, workspaces, discovery
@@ -18,6 +22,22 @@ struct Workspace: Decodable, Identifiable {
     let state: String
     let monitoring: Monitoring
     let owner: String?
+    let dailyCost: Int?
+    let buildStatus: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, state, monitoring, owner
+        case dailyCost = "daily_cost"
+        case buildStatus = "build_status"
+    }
+
+    // An unreachable agent still has an allocated machine. Keep counting a
+    // stopping machine until discovery confirms that it has stopped.
+    var usesEstimatedCredits: Bool {
+        dailyCost == nil && ["running", "unreachable", "pending", "starting", "stopping"].contains(buildStatus ?? state)
+    }
+
+    var creditsUsed: Int { dailyCost.map { max(0, $0) } ?? (usesEstimatedCredits ? 30 : 0) }
 
     var browserURL: URL {
         URL(string: "https://coder.figdev.systems")!
@@ -46,9 +66,11 @@ struct Monitoring: Decodable {
 struct Discovery: Decodable {
     let error: String?
     let checkedAt: String?
+    let listedAt: String?
     enum CodingKeys: String, CodingKey {
         case error
         case checkedAt = "checked_at"
+        case listedAt = "listed_at"
     }
 }
 

@@ -39,6 +39,11 @@ class ServiceTest < Minitest::Test
     assert_empty @service.sessions.sessions
   end
 
+  def test_snapshot_exposes_credit_cost
+    discover(workspace.with(daily_cost: 60))
+    assert_equal 60, @service.snapshot["workspaces"].first["daily_cost"]
+  end
+
   def test_stopped_workspace_loses_its_sessions
     discover(workspace(id: "a"))
     waiting_session_on("a")

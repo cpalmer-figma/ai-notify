@@ -59,6 +59,15 @@ class WorkspaceDiscoveryTest < Minitest::Test
     assert_equal "failed", workspace(build_status: "failed").state
   end
 
+  def test_preserves_reported_credit_cost_including_zero
+    list = JSON.parse(fixture("coder_list.json"))
+    list[0]["latest_build"]["daily_cost"] = 60
+    list[1]["latest_build"]["daily_cost"] = 0
+    result, = discover(stdout: JSON.generate(list))
+
+    assert_equal [60, 0, nil], result.workspaces.map(&:daily_cost)
+  end
+
   def test_coder_failure_returns_error_from_last_stderr_line
     stderr = "Encountered an error running \"coder list\"\nerror: You are not logged in.\n"
     result, _runner = discover(stdout: "", success: false, stderr: stderr)

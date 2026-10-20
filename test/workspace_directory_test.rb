@@ -66,4 +66,14 @@ class WorkspaceDirectoryTest < Minitest::Test
     assert_equal ["alpha"], reloaded.workspaces.map(&:name)
     assert_equal "offline", reloaded.error
   end
+
+  def test_credit_cost_survives_restart_and_is_optional_in_old_cache
+    original = workspace
+    directory.apply(ok(original.with(daily_cost: 60)))
+    assert_equal 60, directory.workspaces.first.daily_cost
+
+    legacy = original.to_h.transform_keys(&:to_s).reject { |key, _| key == "daily_cost" }
+    CoderNotify::JsonFile.write(File.join(tmpdir, "workspaces.json"), { "workspaces" => [legacy] })
+    assert_nil directory.workspaces.first.daily_cost
+  end
 end

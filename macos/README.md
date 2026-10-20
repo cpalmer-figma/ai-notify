@@ -2,6 +2,8 @@
 
 Open `CoderNotify.xcodeproj` in Xcode, select the **CoderNotify** scheme and **My Mac**, then press **⌘R**. A bell appears in the menu bar; click it for the machine list and agent activity. This app uses Apple's native SwiftUI menu bar interface and requires macOS 13 or later.
 
+A credit usage bar at the top of the popup shows the total used out of the 400-credit limit. It uses Coder's reported build costs; when costs are missing, active boxes are estimated at 30 credits each. Usage refreshes with workspace discovery, and failures keep the last known usage labeled as such.
+
 The list includes every discovered Coder workspace, even ones without notification hooks:
 
 - Green: running and reachable.
